@@ -1,0 +1,19 @@
+#!/bin/bash
+sudo apt-get update -y
+sudo apt upgrade -y
+
+echo "192.168.198.40 kube-api-lb
+192.168.198.10 controller-0
+192.168.198.11 controller-1
+192.168.198.12 controller-2
+192.168.198.20 worker-0
+192.168.198.21 worker-1
+192.168.198.22 worker-2" | sudo tee --append /etc/hosts
+
+hostnamectl set-hostname "controller-$1"
+
+sudo cp /vagrant/certs/{ca.pem,ca-key.pem,kubernetes-key.pem,kubernetes.pem,service-account-key.pem,service-account.pem} ~/
+sudo cp /vagrant/certs/{ca.pem,ca-key.pem,kubernetes-key.pem,kubernetes.pem,service-account-key.pem,service-account.pem} /home/vagrant
+
+sudo cp /vagrant/certs/{admin.kubeconfig,kube-controller-manager.kubeconfig,kube-scheduler.kubeconfig,encryption-config.yaml} ~/
+sudo cp /vagrant/certs/{admin.kubeconfig,kube-controller-manager.kubeconfig,kube-scheduler.kubeconfig,encryption-config.yaml} /home/vagrant

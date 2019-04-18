@@ -1,0 +1,48 @@
+#!/bin/bash
+sudo apt-get update -y
+sudo apt upgrade -y
+
+echo "192.168.198.40 kube-api-lb
+192.168.198.10 controller-0
+192.168.198.11 controller-1
+192.168.198.12 controller-2
+192.168.198.20 worker-0
+192.168.198.21 worker-1
+192.168.198.22 worker-2" | sudo tee --append /etc/hosts
+
+hostnamectl set-hostname "kube-api-lb"
+
+sudo apt-get install -y nginx
+sudo systemctl enable nginx
+sudo mkdir -p /etc/nginx/tcpconf.d
+
+#sudo vi /etc/nginx/nginx.conf
+
+# cat "include /etc/nginx/tcpconf.d/*;" >> /etc/nginx/nginx.conf
+
+
+
+CONTROLLER0_IP=192.168.198.10
+CONTROLLER1_IP=192.168.198.11
+CONTROLLER2_IP=192.168.198.12
+
+cat << EOF | sudo tee /etc/nginx/tcpconf.d/kubernetes.conf
+stream {
+    upstream kubernetes {
+        server $CONTROLLER0_IP:6443;
+        server $CONTROLLER1_IP:6443;
+        server $CONTROLLER2_IP:6443;
+    }
+
+    server {
+        listen 6443;
+        listen 443;
+        proxy_pass kubernetes;
+    }
+}
+EOF
+
+# echo "include /etc/nginx/tcpconf.d/*;" | sudo tee --append /etc/nginx/nginx.conf
+# sudo nginx -s reload
+
+# curl -k https://localhost:6443/version

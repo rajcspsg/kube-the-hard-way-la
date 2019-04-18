@@ -1,0 +1,22 @@
+#!/bin/bash
+
+sudo apt-get update -y
+sudo apt upgrade -y
+
+echo "192.168.198.40 kube-api-lb
+192.168.198.10 controller-0
+192.168.198.11 controller-1
+192.168.198.12 controller-2
+192.168.198.20 worker-0
+192.168.198.21 worker-1
+192.168.198.22 worker-2" | sudo tee --append /etc/hosts
+
+hostnamectl set-hostname "worker-$1"
+
+echo "started copying worker certs for $1"
+sudo cp /vagrant/certs/{ca.pem,worker-$1-key.pem,worker-$1.pem} ~/
+sudo cp /vagrant/certs/{ca.pem,worker-$1-key.pem,worker-$1.pem} /home/vagrant
+echo "done copying worker certs"
+
+sudo cp /vagrant/certs/{worker-0.kubeconfig,kube-proxy.kubeconfig}  ~/
+sudo cp /vagrant/certs/{worker-0.kubeconfig,kube-proxy.kubeconfig} /home/vagrant

@@ -1,0 +1,28 @@
+#!/bin/bash
+
+set -euo pipefail
+
+readonly dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+pushd "${dir}/../certs"
+trap 'popd' EXIT
+
+
+CERT_HOSTNAME=10.32.0.1,controller-1,192.168.198.10,controller-2,192.168.198.11,controller-3,192.168.198.12,kube-api-lb,192.168.198.40,127.0.0.1,localhost,kubernetes.default
+
+echo $CERT_HOSTNAME
+
+cfssl gencert \
+-ca=ca.pem \
+-ca-key=ca-key.pem \
+-config=ca-config.json \
+-hostname=${CERT_HOSTNAME} \
+-profile=kubernetes \
+kubernetes-csr.json | cfssljson -bare kubernetes
+
+cfssl gencert \
+-ca=ca.pem \
+-ca-key=ca-key.pem \
+-config=ca-config.json \
+-profile=kubernetes \
+service-account-csr.json | cfssljson -bare service-account
